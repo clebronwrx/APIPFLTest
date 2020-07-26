@@ -1,0 +1,258 @@
+{
+	"info": {
+		"_postman_id": "ad77b6d6-c315-4603-aace-f1bf0b5adb65",
+		"name": "API Assessment",
+		"description": "Provides acess token request as well as required headers for authenticating against the PFL product endpoint.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Access Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "7f71278c-7865-4471-bcb9-829e5fa66cc4",
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"var myToken = jsonData.access_token;",
+							"pm.environment.set(\"myToken\", myToken);",
+							"console.log(myToken);",
+							"",
+							"postman.setNextRequest(\"Get Product Id\");",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "26b410e7-f07f-440b-80df-6961b6d0c01d",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "grant_type",
+							"value": "password",
+							"type": "text"
+						},
+						{
+							"key": "client_id",
+							"value": "a5f2b232-cd18-4a46-be6d-cf4c9d42e5cf",
+							"type": "text"
+						},
+						{
+							"key": "client_secret",
+							"value": "7zg1SZ*o0@qq6ERn:tUqY=5rWGCXW5V3",
+							"type": "text"
+						},
+						{
+							"key": "resource",
+							"value": "https://pfl.pfllink.appportal.api",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "Request12345",
+							"type": "text"
+						},
+						{
+							"key": "username",
+							"value": "apitest@pfllinkappcenterdev.onmicrosoft.com",
+							"type": "text"
+						}
+					],
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://login.microsoftonline.com/pfllinkappcenterdev.onmicrosoft.com/oauth2/token",
+					"protocol": "https",
+					"host": [
+						"login",
+						"microsoftonline",
+						"com"
+					],
+					"path": [
+						"pfllinkappcenterdev.onmicrosoft.com",
+						"oauth2",
+						"token"
+					]
+				},
+				"description": "Authenticate as a normal store user. The OAuth token is used to authenticate subsequent tests."
+			},
+			"response": []
+		},
+		{
+			"name": "Get Product Id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "704cb0ea-0da6-4384-9450-8ec296a79d9f",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							" var jsonData = pm.response.json();",
+							"",
+							"var random = Math.floor(Math.random()*jsonData.length);",
+							"",
+							"console.log(random);",
+							"var productID = jsonData[random].ID",
+							"console.log(productID)",
+							"",
+							"pm.environment.set(\"productID\", productID);",
+							"postman.setNextRequest(\"Get Product Info\")"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "4e5e772d-604e-4768-a757-9d6e34f8b33a",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{myToken}}"
+					},
+					{
+						"key": "ocp-apim-subscription-key",
+						"value": "e67a9b008f554bb380c39a499a3a60a8"
+					}
+				],
+				"url": {
+					"raw": "{{url}}api/v1/store/{{storeID}}/product/",
+					"host": [
+						"{{url}}api"
+					],
+					"path": [
+						"v1",
+						"store",
+						"{{storeID}}",
+						"product",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Product Info",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "dda4628d-c8cd-49cc-b367-528ada031a96",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Your test name\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.ID).to.eql(pm.environment.get(\"productID\"))",
+							"});",
+							"",
+							"console.log(pm.environment.get(\"productID\"))"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{myToken}}",
+						"type": "text"
+					},
+					{
+						"key": "ocp-apim-subscription-key",
+						"value": "e67a9b008f554bb380c39a499a3a60a8",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}api/v1/store/{{storeID}}/product/{{productID}}",
+					"host": [
+						"{{url}}api"
+					],
+					"path": [
+						"v1",
+						"store",
+						"{{storeID}}",
+						"product",
+						"{{productID}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "84f665d2-12df-4634-b841-ab22dd306560",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "44dc5bf4-7cb4-43a1-b93b-7e29682df523",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"protocolProfileBehavior": {}
+}
